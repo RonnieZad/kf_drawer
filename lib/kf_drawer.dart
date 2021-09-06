@@ -1,9 +1,11 @@
 library kf_drawer;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class KFDrawerController {
-  KFDrawerController({this.items = const [], required KFDrawerContent initialPage}) {
+  KFDrawerController(
+      {this.items = const [], required KFDrawerContent initialPage}) {
     this.page = initialPage;
   }
 
@@ -151,7 +153,8 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
     if (widget.disableContentTap) {
       _disableContentTap = widget.disableContentTap;
     }
-    animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    animationController = AnimationController(
+        duration: const Duration(milliseconds: 300), vsync: this);
     animation = Tween<double>(begin: 0.0, end: 1.0).animate(animationController)
       ..addListener(() {
         setState(() {
@@ -159,9 +162,13 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
         });
       });
 
-    scaleAnimation = Tween<double>(begin: 1.0, end: _minScale).animate(animationController);
-    radiusAnimation = BorderRadiusTween(begin: BorderRadius.circular(0.0), end: BorderRadius.circular(_borderRadius))
-        .animate(CurvedAnimation(parent: animationController, curve: Curves.ease));
+    scaleAnimation =
+        Tween<double>(begin: 1.0, end: _minScale).animate(animationController);
+    radiusAnimation = BorderRadiusTween(
+            begin: BorderRadius.circular(0.0),
+            end: BorderRadius.circular(_borderRadius))
+        .animate(
+            CurvedAnimation(parent: animationController, curve: Curves.ease));
   }
 
   @override
@@ -173,7 +180,9 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
     return Listener(
       onPointerDown: (PointerDownEvent event) {
         if (_disableContentTap) {
-          if (_menuOpened && event.position.dx / MediaQuery.of(context).size.width >= _drawerWidth) {
+          if (_menuOpened &&
+              event.position.dx / MediaQuery.of(context).size.width >=
+                  _drawerWidth) {
             _close();
           } else {
             setState(() {
@@ -182,14 +191,17 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
           }
         } else {
           setState(() {
-            _isDraggingMenu = (_menuOpened && event.position.dx / MediaQuery.of(context).size.width >= _drawerWidth) ||
+            _isDraggingMenu = (_menuOpened &&
+                    event.position.dx / MediaQuery.of(context).size.width >=
+                        _drawerWidth) ||
                 (!_menuOpened && event.position.dx <= 8.0);
           });
         }
       },
       onPointerMove: (PointerMoveEvent event) {
         if (_isDraggingMenu) {
-          animationController.value = event.position.dx / MediaQuery.of(context).size.width;
+          animationController.value =
+              event.position.dx / MediaQuery.of(context).size.width;
         }
       },
       onPointerUp: (PointerUpEvent event) {
@@ -212,7 +224,10 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
           Transform.scale(
             scale: scaleAnimation.value,
             child: Transform.translate(
-              offset: Offset((MediaQuery.of(context).size.width * _drawerWidth) * animation.value, 0.0),
+              offset: Offset(
+                  (MediaQuery.of(context).size.width * _drawerWidth) *
+                      animation.value,
+                  0.0),
               child: AbsorbPointer(
                 absorbing: _menuOpened && _disableContentTap,
                 child: Stack(
@@ -223,7 +238,8 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
                           child: Container(
                             padding: EdgeInsets.symmetric(vertical: 32.0),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.all(Radius.circular(_shadowBorderRadius)),
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(_shadowBorderRadius)),
                               child: Container(
                                 color: Colors.white.withAlpha(128),
                               ),
@@ -233,7 +249,8 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
                       ],
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: animation.value * _shadowOffset),
+                      padding: EdgeInsets.only(
+                          left: animation.value * _shadowOffset),
                       child: ClipRRect(
                         borderRadius: radiusAnimation.value,
                         child: Container(
@@ -269,7 +286,7 @@ class _KFDrawer extends StatefulWidget {
     this.decoration,
     this.scrollable = true,
     this.padding,
-  }) : super(key: key);
+  });
 
   Widget? header;
   Widget? footer;
@@ -290,6 +307,7 @@ class __KFDrawerState extends State<_KFDrawer> {
   Widget _getMenu() {
     if (widget.scrollable) {
       return ListView(
+        physics: BouncingScrollPhysics(),
         children: [
           Container(
             child: widget.header,
@@ -340,39 +358,66 @@ class __KFDrawerState extends State<_KFDrawer> {
 }
 
 class KFDrawerItem extends StatelessWidget {
-  KFDrawerItem({this.onPressed, this.text, this.icon});
+  KFDrawerItem({this.onPressed, this.isMenu = false, this.text, this.icon});
 
-  KFDrawerItem.initWithPage({this.onPressed, this.text, this.icon, this.alias, this.page});
+  KFDrawerItem.initWithPage(
+      {this.onPressed,
+      this.isMenu = false,
+      this.text,
+      this.icon,
+      this.alias,
+      this.page});
 
   GestureTapCallback? onPressed;
   Widget? text;
   Widget? icon;
+
+  bool isMenu;
 
   String? alias;
   KFDrawerContent? page;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 2.0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.only(left: 16.0, right: 8.0),
-                  child: icon,
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 2.h),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              onTap: onPressed ?? null,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.only(left: 0.w, right: 8.w),
+                      child: icon,
+                    ),
+                    if (text != null) text!,
+                  ],
                 ),
-                if (text != null) text!,
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        isMenu ? SizedBox(height: 5.h) : Container(),
+        isMenu
+            ? Padding(
+                padding:  EdgeInsets.only(top: 5.h, bottom: 5.w),
+                child: Divider(
+                  endIndent: 365.w,
+                  color: Colors.white,
+                ))
+            : Container(),
+        isMenu ? SizedBox(height: 5.h) : Container(),
+      ]
     );
   }
 }

@@ -1,6 +1,7 @@
 library kf_drawer;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class KFDrawerController {
@@ -74,7 +75,7 @@ class _KFDrawerState extends State<KFDrawer> with TickerProviderStateMixin {
   bool _disableContentTap = true;
 
   late Animation<double> animation, scaleAnimation;
-  late Animation<BorderRadius> radiusAnimation;
+  late Animation<BorderRadius?> radiusAnimation;
   late AnimationController animationController;
 
   _open() {
@@ -306,18 +307,32 @@ class __KFDrawerState extends State<_KFDrawer> {
 
   Widget _getMenu() {
     if (widget.scrollable) {
-      return ListView(
+      return Stack(
+        children: <Widget>[
+           Padding(
+             padding: EdgeInsets.only(top: 25.h),
+
+           child: Container(
+            child: widget.header,
+          ),),
+           Padding(
+             padding: EdgeInsets.only(top: 140.h),
+
+           child: SizedBox(width: 245.w, 
+      child: CupertinoScrollbar(
+        child: ListView(
         physics: BouncingScrollPhysics(),
         children: [
-          Container(
-            child: widget.header,
-          ),
+         
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: widget.items,
           ),
           if (widget.footer != null) widget.footer!,
         ],
+      ),
+      
+      ),),),]
       );
     } else {
       return Column(
@@ -412,7 +427,7 @@ class KFDrawerItem extends StatelessWidget {
             ? Padding(
                 padding:  EdgeInsets.only(top: 5.h, bottom: 5.w),
                 child: Divider(
-                  endIndent: 365.w,
+                  endIndent: 145.w,
                   color: Colors.white,
                 ))
             : Container(),
